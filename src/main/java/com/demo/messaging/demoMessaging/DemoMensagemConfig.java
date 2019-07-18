@@ -18,7 +18,11 @@ public class DemoMensagemConfig {
 
     @Bean
     public ActiveMQConnectionFactory connectionFactory() {
-        return new ActiveMQConnectionFactory(brokerUrl);
+    	ActiveMQConnectionFactory activeMQConnectionFactory =
+    			new ActiveMQConnectionFactory(brokerUrl);
+    	activeMQConnectionFactory.setTrustAllPackages(true);
+    	
+        return activeMQConnectionFactory;
     }
 
     @Bean
