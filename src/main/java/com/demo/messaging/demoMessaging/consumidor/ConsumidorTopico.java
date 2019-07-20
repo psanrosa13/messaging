@@ -1,47 +1,59 @@
 package com.demo.messaging.demoMessaging.consumidor;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
+import javax.jms.JMSException;
+import javax.jms.TextMessage;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
-import org.springframework.messaging.Message;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
+
+import com.demo.messaging.demoMessaging.model.Mensagem;
 
 @Component
 public class ConsumidorTopico {
-
-//	@JmsListener(destination = "topico.mensagem" , containerFactory = "jmsFactoryTopic")
-//	public void consumirMensagemTopico(String mensagem) {
-//		System.out.println("TOPICO"+ mensagem );
-//	}
 	
+	@Value("${spring.activemq.topic.mensagem}")
+	private String topico;
+	
+	@Autowired
+	@Qualifier("jmsTemplateTopic")
+	private JmsTemplate jmsTemplateTopico;
+	
+	public void consumirMensagemTopicoSincrono() throws JMSException {
+		TextMessage mensagem = (TextMessage) jmsTemplateTopico.receive("topico.sincrono");
+		System.out.println("TOPICO mensagem SINCRONO > "+ mensagem.getText());
+	}
+
 	@JmsListener(destination = "topico.mensagem" ,
 					containerFactory = "jmsFactoryTopic",
-					selector = "visualizado = false")
-	public void consumirMensagemTopico(String mensagem) {
-		System.out.println("TOPICO"+ mensagem );
+					selector = "visualizado = false",
+					subscription = "consumidor1")
+	public void consumirMensagemTopicoComSeletor(Mensagem mensagem) {
+		System.out.println("TOPICO SELETOR > "+ mensagem.toString() );
 	}
 	
-//	@JmsListener(destination = "topico.mensagem" , containerFactory = "jmsFactoryTopic")
-//	@SendTo("${spring.activemq.topic.tranformacao}") 
-//	public Message<String> consumirMensagemTopico(Message mensagem) {
-//		System.out.println("TOPICO"+ mensagem.getHeaders() );
-//		
-//		return MessageBuilder              
-//                .withPayload(mensagem.getPayload().toString())
-//                .setHeader("ID", UUID.randomUUID().toString())
-//                .setHeader("DATE",
-//                       new SimpleDateFormat("yyyy-MM-dd")
-//                               .format(new Date()))
-//                .build();
-//	}
 	
-	@JmsListener(destination = "topico.transformacao" , containerFactory = "jmsFactoryTopic")
-	public void consumirMensagemTopicoTransformacao(Message mensagem) {
-		System.out.println("TOPICO tranformação:"+ mensagem.getPayload() );
+	@JmsListener(destination = "topico.mensagem" ,
+			containerFactory = "jmsFactoryTopic", 
+			subscription = "consumidor2")
+	@SendTo("${spring.activemq.topic.tranformacao}") 
+	public Mensagem consumirMensagemTopicoEenviaParaOutro(Mensagem mensagem) {
+		
+		System.out.println("TOPICO REDIRECIONADOR > "+ mensagem.toString() );
+		
+		return mensagem;
+	}
+	
+	
+	@JmsListener(destination = "topico.transformacao" ,
+			containerFactory = "jmsFactoryTopic",
+			subscription = "consumidor1")
+	public void consumirMensagemTopicoTransformacao(Mensagem mensagem) {
+		System.out.println("TOPICO tranformação > "+ mensagem.toString() );
 	}
 	
 }

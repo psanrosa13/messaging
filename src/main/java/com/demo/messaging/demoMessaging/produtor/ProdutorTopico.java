@@ -18,23 +18,8 @@ public class ProdutorTopico {
 	@Qualifier("jmsTemplateTopic")
 	private JmsTemplate jmsTemplateTopico;
 	
-	
-//	public boolean publicar(Mensagem mensagem) {
-//		try {
-//			this.jmsTemplateTopico.convertAndSend(this.topico, mensagem.toString());
-//		}catch (Exception e) {
-//			return false;
-//		}
-//		return true;
-//	}
-	
-	public boolean publicar(Mensagem mensagem) {
-		try {
-			this.jmsTemplateTopico.convertAndSend(this.topico, mensagem.toString());
-		}catch (Exception e) {
-			return false;
-		}
-		return true;
+	public void publicar(Mensagem mensagem) {
+		this.jmsTemplateTopico.convertAndSend(this.topico, mensagem);
 	}
-
+	
 }

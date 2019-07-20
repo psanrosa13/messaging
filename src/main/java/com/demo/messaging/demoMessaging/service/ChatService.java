@@ -18,14 +18,27 @@ public class ChatService {
 	ProdutorTopico produtorTopico;
 	
 	
-	public Status incluirMensagem(Mensagem mensagem) {
+	public Status incluirMensagemFila(Mensagem mensagem) {
 		
-		if (produtorFila.publicar(mensagem) && 
-				produtorTopico.publicar(mensagem)) {
-			return new Status("AGUARDANDO CONFIRMAÇÃO","Seu pedido foi encaminhado para o fornecedor");
-		}else {
+		try {
+			produtorFila.publicar(mensagem);
+		}catch(Exception e) {
 			return new Status("ERRO","Houve um problema ao solicitar seu pedido");
 		}
+		
+		return new Status("AGUARDANDO CONFIRMAÇÃO","Seu pedido foi encaminhado para o fornecedor");
+	}
+	
+	
+	public Status incluirMensagemTopico(Mensagem mensagem) {
+		
+		try {
+			produtorTopico.publicar(mensagem);
+		}catch(Exception e) {
+			return new Status("ERRO","Houve um problema ao solicitar seu pedido");
+		}
+		
+		return new Status("AGUARDANDO CONFIRMAÇÃO","Seu pedido foi encaminhado para o fornecedor");
 	}
 
 }

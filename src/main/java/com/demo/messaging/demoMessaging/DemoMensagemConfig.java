@@ -6,8 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.jms.core.JmsTemplate;
+
+import com.demo.messaging.demoMessaging.converter.ConversorMensagem;
+import com.demo.messaging.demoMessaging.handler.DefaultErrorHandler;
 
 @Configuration
 @EnableJms
@@ -29,6 +31,8 @@ public class DemoMensagemConfig {
     public DefaultJmsListenerContainerFactory jmsFactoryTopic() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory());
+        factory.setErrorHandler(new DefaultErrorHandler());
+        factory.setMessageConverter(getConversor());
         factory.setPubSubDomain(true);
         return factory;
     }
@@ -37,6 +41,8 @@ public class DemoMensagemConfig {
     public DefaultJmsListenerContainerFactory jmsFactoryQueue() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory());
+        factory.setErrorHandler(new DefaultErrorHandler());
+        factory.setMessageConverter(getConversor());
         factory.setPubSubDomain(false);
         return factory;
     }
@@ -45,6 +51,7 @@ public class DemoMensagemConfig {
     public JmsTemplate jmsTemplateTopic() {
     	JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
     	jmsTemplate.setPubSubDomain(true);
+    	jmsTemplate.setMessageConverter(getConversor());
         return jmsTemplate;
     }
     
@@ -52,7 +59,13 @@ public class DemoMensagemConfig {
     public JmsTemplate jmsTemplateQueue() {
     	JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory());
     	jmsTemplate.setPubSubDomain(false);
+    	jmsTemplate.setMessageConverter(getConversor());
         return jmsTemplate;
     }
+    
+   @Bean
+   public ConversorMensagem getConversor() {
+	   return new ConversorMensagem();	   
+   }
     
 }
